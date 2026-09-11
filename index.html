@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GulfHire AI — CV Optimizer for Gulf Jobs</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<style>
+  :root{ --gold:#d4af37; --gold2:#f5e08c; --bg:#0a0a0a; --card:#141414; --line:#2a2a2a; --txt:#eaeaea; --mut:#9a9a9a; }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:Georgia,'Times New Roman',serif}
+  body{background:var(--bg);color:var(--txt);min-height:100vh;padding:24px}
+  .wrap{max-width:860px;margin:0 auto}
+  .badge{display:inline-block;border:1px solid var(--gold);color:var(--gold);padding:4px 14px;border-radius:99px;font-size:12px;letter-spacing:3px;text-transform:uppercase}
+  h1{font-size:clamp(28px,5vw,44px);margin:14px 0 6px}
+  h1 span{color:var(--gold)}
+  .sub{color:var(--mut);margin-bottom:24px;font-size:15px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:18px}
+  label{display:block;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin:12px 0 6px}
+  textarea,select,input{width:100%;background:#0d0d0d;border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:12px;font-size:14px;line-height:1.6}
+  textarea{min-height:160px;resize:vertical;font-family:Arial,sans-serif}
+  select option, select optgroup{background:#141414;color:var(--txt);font-family:Arial,sans-serif}
+  button{background:linear-gradient(135deg,var(--gold),#b8912a);color:#000;border:none;padding:14px 28px;border-radius:8px;font-size:15px;font-weight:bold;cursor:pointer;letter-spacing:1px;margin-top:16px;width:100%}
+  button:hover{filter:brightness(1.1)}
+  .ghost{background:transparent;border:1px solid var(--gold);color:var(--gold)}
+  .wa{background:#0d1f12;border:1px solid #1e4d2b;color:#25D366}
+  .score{font-size:52px;color:var(--gold);font-weight:bold}
+  .bar{height:10px;background:#222;border-radius:99px;overflow:hidden;margin:10px 0 6px}
+  .bar>div{height:100%;background:linear-gradient(90deg,#8a6d1c,var(--gold),var(--gold2));transition:width .6s}
+  .kw{display:inline-block;background:#1e1a0d;border:1px solid #3a3113;color:var(--gold2);padding:4px 10px;border-radius:6px;margin:4px;font-size:13px}
+  .kw.miss{background:#241010;border-color:#4a1a1a;color:#e07b7b}
+  h3{color:var(--gold);margin:16px 0 8px;font-size:16px;letter-spacing:1px}
+  .out{white-space:pre-wrap;background:#0d0d0d;border:1px solid var(--line);border-radius:8px;padding:14px;font-size:14px;line-height:1.7;font-family:Arial,sans-serif}
+  .tip{border-left:3px solid var(--gold);padding:8px 12px;margin:8px 0;background:#111;color:#cfcfcf;font-size:14px;font-family:Arial,sans-serif}
+  #result{display:none}
+  .foot{text-align:center;color:#555;font-size:12px;margin-top:26px;font-family:Arial,sans-serif}
+  .paybox{background:linear-gradient(160deg,#191507,#0f0d06);border:1px solid #4a3d14;border-radius:14px;padding:22px;text-align:center}
+  .paybox h2{color:var(--gold);font-size:22px;margin-bottom:4px}
+  .acct{font-size:30px;letter-spacing:4px;color:var(--gold2);margin:10px 0 2px;font-weight:bold}
+  .bankname{color:var(--mut);letter-spacing:3px;font-size:13px}
+  .amt{font-size:18px;color:#fff;margin:10px 0 2px}
+  .amt b{color:var(--gold)}
+  .steps{text-align:left;margin:14px auto;max-width:420px;font-size:14px;font-family:Arial,sans-serif;color:#cfcfcf}
+  .steps li{margin:6px 0}
+  .codebox{display:flex;gap:8px;margin-top:14px}
+  .codebox input{flex:1;text-align:center;letter-spacing:3px;font-size:16px;text-transform:uppercase}
+  .codebox button{margin-top:0;width:auto;padding:12px 22px}
+  #lockMsg{font-size:13px;color:#e07b7b;margin-top:8px;font-family:Arial,sans-serif;min-height:16px}
+  .blurred{filter:blur(7px);pointer-events:none;user-select:none}
+  .filebtn{display:flex;align-items:center;justify-content:center;gap:10px;border:2px dashed #4a3d14;border-radius:10px;padding:18px;margin-top:8px;cursor:pointer;color:var(--gold);font-size:15px;background:#0f0d06;transition:border-color .2s}
+  .filebtn:hover{border-color:var(--gold)}
+  #file{display:none}
+  #fileBadge{font-size:13px;color:#7be08a;margin-top:8px;font-family:Arial,sans-serif;min-height:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="badge">GulfHire AI · MVP</div>
+  <h1>Pass the <span>ATS</span>.<br>Get the Gulf interview.</h1>
+  <p class="sub">Upload your CV (PDF, Word, TXT) or paste the text — get an ATS score, missing keywords, and a recruiter-ready summary for Saudi, UAE &amp; Qatar jobs. <b style="color:var(--gold)">14 target roles.</b></p>
+
+  <!-- PAYWALL -->
+  <div class="card paybox" id="paywall">
+    <h2>🔓 Unlock Full Reports</h2>
+    <p style="color:var(--mut);font-size:13px;font-family:Arial,sans-serif">1 free scan used. Get your full keyword report + recruiter summary.</p>
+    <p class="amt">Pay <b>₦500</b> per report &nbsp;or&nbsp; <b>₦2,000</b> unlimited (1 month)</p>
+    <div class="acct" id="acctNo">8140252151</div>
+    <div class="bankname">OPAY · AMINU ILIYASU</div>
+    <button class="ghost" onclick="copyAcct()">Copy Account Number</button>
+    <ol class="steps">
+      <li>Transfer <b>₦500</b> (or ₦2,000 for unlimited) to the OPay account above.</li>
+      <li>Send your payment screenshot on WhatsApp.</li>
+      <li>Get your unlock code instantly.</li>
+    </ol>
+    <a href="https://wa.me/2349060531277?text=Hello!%20I%20just%20paid%20for%20GulfHire%20AI%20(unlock%20code).%20Here%20is%20my%20screenshot%3A" style="text-decoration:none">
+      <button class="wa">📲 Send Screenshot on WhatsApp</button>
+    </a>
+    <div class="codebox">
+      <input id="code" placeholder="ENTER UNLOCK CODE" maxlength="12">
+      <button onclick="unlock()">Unlock</button>
+    </div>
+    <div id="lockMsg"></div>
+  </div>
+
+  <!-- APP -->
+  <div class="card" id="appCard">
+    <label>Target Role</label>
+    <select id="role">
+      <optgroup label="Hospitality &amp; Facility">
+        <option value="hospitality">Hospitality — Front Office / F&amp;B / Guest Relations</option>
+        <option value="chef">Chef / Cook</option>
+        <option value="cleaner">Cleaner / Housekeeping Attendant</option>
+      </optgroup>
+      <optgroup label="Security &amp; Safety">
+        <option value="security">Security Guard / Safety Officer</option>
+        <option value="hse">HSE / Health, Safety &amp; Environment</option>
+      </optgroup>
+      <optgroup label="Technical &amp; Industrial">
+        <option value="technician">Technician — Electrical / HVAC / Maintenance</option>
+        <option value="construction">Construction / Tradesman (Mason, Carpenter, Welder…)</option>
+        <option value="oilgas">Oil &amp; Gas / Industrial (Rigger, Pipe Fitter…)</option>
+        <option value="driver">Driver — Light / Heavy Vehicle</option>
+        <option value="warehouse">Warehouse / Logistics Assistant</option>
+      </optgroup>
+      <optgroup label="Sales &amp; Office">
+        <option value="retail">Retail / Sales Associate</option>
+        <option value="callcenter">Customer Service / Call Center</option>
+        <option value="admin">Admin / Office Assistant</option>
+      </optgroup>
+      <optgroup label="Care">
+        <option value="healthcare">Healthcare / Caregiver</option>
+      </optgroup>
+    </select>
+
+    <label>📎 Upload your CV file</label>
+    <label class="filebtn" for="file">⬆️ Choose file — PDF, DOC, DOCX, TXT, RTF</label>
+    <input type="file" id="file" accept=".pdf,.doc,.docx,.txt,.rtf" onchange="handleFile(this)">
+    <div id="fileBadge"></div>
+
+    <label>…or paste your CV text here</label>
+    <textarea id="cv" placeholder="e.g. JOHN DOE — Security Guard. 3 years experience at XYZ Nigeria. Duties: access control, patrols, CCTV monitoring..."></textarea>
+    <button onclick="analyze()">⚡ Analyze My CV</button>
+  </div>
+
+  <div id="result" class="card">
+    <h3>Your ATS Match Score</h3>
+    <div class="score" id="scoreNum">0%</div>
+    <div class="bar"><div id="scoreBar" style="width:0%"></div></div>
+    <p id="verdict" style="color:var(--mut);font-size:13px;font-family:Arial,sans-serif"></p>
+    <h3>✅ Keywords you have</h3>
+    <div id="have"></div>
+    <h3>❌ Missing keywords (add these!)</h3>
+    <div id="miss" class="proOnly"></div>
+    <h3>✍️ Recruiter-Ready Professional Summary</h3>
+    <div class="out proOnly" id="summary"></div>
+    <button class="ghost" onclick="copyOut()">Copy Summary</button>
+    <h3>🎯 Fix These to Get Hired</h3>
+    <div id="tips" class="proOnly"></div>
+  </div>
+  <p class="foot">© GulfHire AI — built for African talent heading to the Gulf</p>
+</div>
+
+<script>
+/* ===== OWNER SETTINGS =====
+   CHANGE THIS CODE ANYTIME. Give it to customers after OPay payment.
+   For unlimited plan use code: GH2000                                        */
+const UNLOCK_CODES = ["GH2026", "GH2000"];
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+const BANKS = {
+  hospitality: {
+    kw: ["customer service","guest satisfaction","front office","check-in","check-out","reservation","opera","pms","f&b","food and beverage","housekeeping","room service","upselling","complaint resolution","multitasking","grooming","sop","haccp","star hotel","five-star","vip","arabic","english"],
+    title: "Hospitality Professional",
+    goal: "five-star guest satisfaction",
+    tips: [
+      "Name the hotel brands you've worked with (Marriott, Hilton, Accor…) — recruiters filter by brand.",
+      "Add 'OPERA PMS' if you've used any hotel software — it's the #1 Gulf hospitality keyword.",
+      "State your English level (IELTS score if you have one) and any Arabic basics.",
+      "Use numbers: 'served 200+ guests/day', 'achieved 95% satisfaction score'."
+    ]
+  },
+  chef: {
+    kw: ["kitchen","culinary","food safety","haccp","menu","food preparation","mise en place","continental","arabic cuisine","indian cuisine","grill","sous chef","head chef","sanitation","restaurant","banquet","catering","butchery","bakery","pastry"],
+    title: "Chef / Culinary Professional",
+    goal: "exceptional culinary standards and food safety compliance",
+    tips: [
+      "List the cuisines you cook — Continental, Arabic, Indian, African, Chinese — Gulf kitchens search by cuisine.",
+      "Quantify: 'prepared 300+ covers/day', 'managed banquet for 1,000 guests'.",
+      "HACCP or food safety certificate? Put it in CAPITALS near the top.",
+      "Hotel experience beats restaurant experience for Gulf recruiters — name the properties."
+    ]
+  },
+  cleaner: {
+    kw: ["cleaning","sanitation","housekeeping","janitorial","disinfection","mopping","polishing","waste management","hygiene","public area","laundry","cleaning chemicals","room attendant","floor care","detailing","sterilization"],
+    title: "Cleaning / Housekeeping Attendant",
+    goal: "spotless, audit-ready facilities",
+    tips: [
+      "Separate hotel/commercial cleaning from domestic cleaning — commercial is valued higher.",
+      "Mention machines you can use: scrubber dryers, vacuums, carpet extractors.",
+      "Knowing chemical handling and dilution ratios is a real plus — state it explicitly.",
+      "Show reliability: 'zero complaints over 2 years', 'cleaned 30+ rooms daily'."
+    ]
+  },
+  security: {
+    kw: ["access control","patrol","cctv","surveillance","incident report","first aid","fire safety","emergency response","sia","crowd control","physical security","checkpoint","badge","loss prevention","risk assessment","watchtower"],
+    title: "Security Professional",
+    goal: "site safety and access control excellence",
+    tips: [
+      "Highlight any formal training: NSCDC, police background, SIA-style courses, first aid certificates.",
+      "Gulf recruiters love 'CCTV monitoring' + 'incident reporting' — make them their own bullet points.",
+      "Mention height/fitness readiness and willingness to work rotating shifts — it signals deployability.",
+      "If you have a driving licence, add it — many KSA guard roles require patrol driving."
+    ]
+  },
+  hse: {
+    kw: ["hse","safety officer","nebosh","iosh","osha","risk assessment","toolbox talk","incident investigation","permit to work","ptw","hazard identification","ppe","compliance","audit","kpi","safety induction","fire drill"],
+    title: "HSE Officer",
+    goal: "zero-incident site compliance",
+    tips: [
+      "Put NEBOSH / IOSH / OSHA certificates in CAPITALS at the top — they're the first filters.",
+      "'Permit to Work (PTW)' and 'Toolbox Talks' are must-have keywords for KSA construction/oil & gas.",
+      "Quantify: 'conducted 50+ safety inductions', 'reduced incidents by 30%'.",
+      "Note: many HSE roles are Saudi-national-only — target contracting firms that hire expats."
+    ]
+  },
+  technician: {
+    kw: ["electrical","maintenance","troubleshooting","wiring","hvac","repair","installation","preventive maintenance","diagnosis","circuit","generator","ac technician","mechanical","plc","equipment","safety","technical"],
+    title: "Maintenance Technician",
+    goal: "maximum equipment uptime and preventive maintenance excellence",
+    tips: [
+      "HVAC is the hottest Gulf trade — if you've done AC installation/service, say so loudly.",
+      "List equipment brands you've worked on (Daikin, LG, Cummins generators…) — recruiters search by brand.",
+      "Trade certificates (City & Guilds, NABTEB, trade test) go at the top in CAPITALS.",
+      "Split skills: installation vs preventive maintenance vs breakdown repair — each is a searched keyword."
+    ]
+  },
+  construction: {
+    kw: ["masonry","plastering","steel fixing","carpentry","tiling","painting","scaffolding","concreting","formwork","laborer","site work","foreman","finishing","gypsum","welding","plumbing","block work","shuttering"],
+    title: "Construction Tradesman",
+    goal: "quality workmanship delivered on schedule",
+    tips: [
+      "State your exact trade in the first line — 'Block Mason', 'Steel Fixer', 'Tiles Fixer' — that's how Gulf agencies search.",
+      "Trade test certificates and any GCC site experience multiply your value.",
+      "Quantify output: 'laid 80 blocks/day', 'finished 2 apartments/week'.",
+      "Mention tools you own or operate — it signals you can start immediately."
+    ]
+  },
+  oilgas: {
+    kw: ["rigger","rig","pipe fitting","welding","offshore","onshore","drilling","scaffolding","permit to work","ptw","h2s","mechanical fitter","foreman","shutdown","maintenance","safety","petrochemical"],
+    title: "Oil & Gas / Industrial Professional",
+    goal: "safe, efficient operations in high-risk environments",
+    tips: [
+      "Any offshore certs (BOSIET, H2S Awareness, HUET) go at the very top — they're rare and prized.",
+      "Mention rotation readiness (e.g. 'available for 28/28 rotations') — it's a real screening question.",
+      "Shutdown/turnaround experience is gold — name the projects and your role.",
+      "Welders: specify processes (SMAW, TIG, MIG) and positions (6G) — that's exactly how vacancies are written."
+    ]
+  },
+  driver: {
+    kw: ["driving licence","heavy vehicle","light vehicle","delivery","route planning","logistics","vehicle maintenance","defensive driving","trailer","pickup","van","fuel management","clean driving record","gcc licence","transport"],
+    title: "Professional Driver",
+    goal: "safe, timely transport and delivery operations",
+    tips: [
+      "Licence first: state class, year obtained, and expiry — 'valid till 2028' removes a recruiter's doubt.",
+      "List every vehicle type: trailer, tipper, bus, pickup, van — each is a searched keyword.",
+      "Mention you're ready to convert to a GCC/Saudi licence — it's a cost recruiters worry about.",
+      "A clean record + accident-free years is your strongest selling point — make it a headline."
+    ]
+  },
+  warehouse: {
+    kw: ["inventory","stock control","picking","packing","forklift","loading","unloading","logistics","supply chain","barcode","scanner","dispatch","receiving","warehouse","pallet","shipment","order fulfillment"],
+    title: "Warehouse / Logistics Assistant",
+    goal: "accurate, efficient warehouse operations",
+    tips: [
+      "Forklift licence = instant advantage — if you have one, put it in the first line.",
+      "Mention any WMS/inventory systems (SAP, Oracle) even if basic — it's a keyword filter.",
+      "Quantify accuracy: '99.5% picking accuracy', 'processed 500+ orders/day'.",
+      "Physical fitness and shift flexibility are actual requirements — state them."
+    ]
+  },
+  retail: {
+    kw: ["sales","customer service","cashier","pos","merchandising","inventory","retail","sales target","upselling","product knowledge","billing","stock management","fashion","electronics","communication"],
+    title: "Retail / Sales Associate",
+    goal: "target-smashing sales and five-star customer experience",
+    tips: [
+      "Show numbers: 'exceeded monthly target by 25%', 'closed ₦X in monthly sales'.",
+      "Name the brands/shops you sold — Gulf luxury retail (malls!) filters by brand background.",
+      "POS systems you've used (Square, Shopify, custom tills) belong in your skills list.",
+      "Languages are a huge plus in Gulf retail — state English level plus any Arabic/French."
+    ]
+  },
+  callcenter: {
+    kw: ["customer service","inbound","outbound","call center","communication","crm","complaint resolution","telephone","english","typing","escalation","support","multilingual","customer satisfaction","helpdesk"],
+    title: "Customer Service Professional",
+    goal: "first-call resolution and top customer satisfaction scores",
+    tips: [
+      "State your English level clearly (IELTS/TOEFL score if you have one) — it's the #1 filter for Gulf call centers.",
+      "Typing speed (WPM) and CRM tools (Zendesk, Salesforce) go in the skills section.",
+      "Mention shift flexibility — Gulf centers run 24/7 and ask about it in interviews.",
+      "Numbers again: 'handled 80+ calls/day', '95% CSAT score'."
+    ]
+  },
+  admin: {
+    kw: ["administration","secretarial","receptionist","data entry","microsoft office","excel","word","outlook","filing","correspondence","scheduling","office management","documentation","typing","records"],
+    title: "Administrative Professional",
+    goal: "seamless office operations and executive support",
+    tips: [
+      "Typing speed (WPM) + MS Office proficiency are the first filters — put them at the top.",
+      "Quantify your support: 'managed calendars for 3 executives', 'processed 200+ documents/month'.",
+      "Any ERP/document management experience (SAP, SharePoint) is a strong keyword.",
+      "Emphasize confidentiality and discretion — it's a stated requirement in Gulf admin roles."
+    ]
+  },
+  healthcare: {
+    kw: ["patient care","caregiver","nursing assistant","vital signs","first aid","cpr","infection control","personal care","elderly care","hygiene","documentation","patient hygiene","mobility assistance","medication","companion care","disability support"],
+    title: "Caregiver / Healthcare Assistant",
+    goal: "compassionate, dignified patient care",
+    tips: [
+      "Caregiving diploma or certificate? First line, CAPITALS. It's the main trust signal.",
+      "First Aid + CPR certification is often mandatory — make it unmissable.",
+      "Describe the care you gave: elderly, post-surgery, dementia, children — families and agencies search by care type.",
+      "Gulf employers check medical fitness heavily — stating 'medically fit, ready for medical screening' helps."
+    ]
+  }
+};
+
+/* ---------- FILE UPLOAD & TEXT EXTRACTION ---------- */
+async function handleFile(inp){
+  const f = inp.files[0];
+  if(!f) return;
+  const badge = document.getElementById('fileBadge');
+  badge.style.color = 'var(--gold2)';
+  badge.textContent = '⏳ Reading ' + f.name + ' ...';
+  const ext = f.name.split('.').pop().toLowerCase();
+  let text = '';
+  try{
+    if(ext === 'pdf'){ text = await readPdf(f); }
+    else if(ext === 'docx'){ text = await readDocx(f); }
+    else if(ext === 'doc'){ text = await readOldDoc(f); }
+    else { text = await f.text(); if(ext === 'rtf') text = stripRtf(text); }
+    text = (text || '').replace(/\s+\n/g,'\n').trim();
+    if(text.length < 30) throw new Error('too short');
+    document.getElementById('cv').value = text;
+    badge.style.color = '#7be08a';
+    badge.textContent = '✓ Extracted "' + f.name + '" — ' + text.length.toLocaleString() + ' characters ready. Now hit Analyze!';
+  }catch(e){
+    badge.style.color = '#e07b7b';
+    badge.textContent = '✗ Could not read that file — please copy & paste the text instead.';
+  }
+  inp.value = '';
+}
+
+async function readPdf(f){
+  const buf = await f.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({data: buf}).promise;
+  let out = '';
+  for(let i = 1; i <= pdf.numPages; i++){
+    const page = await pdf.getPage(i);
+    const tc = await page.getTextContent();
+    out += tc.items.map(it => it.str).join(' ') + '\n';
+  }
+  return out;
+}
+
+async function readDocx(f){
+  const buf = await f.arrayBuffer();
+  const res = await mammoth.extractRawText({arrayBuffer: buf});
+  return res.value;
+}
+
+async function readOldDoc(f){
+  const bytes = new Uint8Array(await f.arrayBuffer());
+  const tryDecode = (enc) => {
+    const s = new TextDecoder(enc).decode(bytes);
+    const letters = (s.match(/[a-zA-Z ]/g) || []).length;
+    return {s, ratio: letters / Math.max(s.length,1)};
+  };
+  const a = tryDecode('utf-16le');
+  const b = tryDecode('windows-1252');
+  let best = (a.ratio > b.ratio ? a.s : b.s);
+  return best.replace(/[^\x09\x0A\x0D\x20-\x7E]/g, ' ').replace(/ {2,}/g, ' ');
+}
+
+function stripRtf(t){
+  return t.replace(/\\'[0-9a-fA-F]{2}/g,'')
+          .replace(/\\par[d]?/g,'\n')
+          .replace(/\\[a-zA-Z]+-?\d* ?/g,'')
+          .replace(/[{}]/g,'')
+          .trim();
+}
+
+/* ---------- PAYWALL ---------- */
+const isUnlocked = () => localStorage.getItem('gh_unlocked') === '1';
+const freeUsed   = () => localStorage.getItem('gh_free') === '1';
+
+function refreshGate(){
+  document.getElementById('paywall').style.display = isUnlocked() ? 'none' : 'block';
+  const proEls = document.querySelectorAll('.proOnly');
+  if(isUnlocked()){ proEls.forEach(e => e.classList.remove('blurred')); }
+  else if(freeUsed()){ proEls.forEach(e => e.classList.add('blurred')); }
+}
+
+function unlock(){
+  const v = document.getElementById('code').value.trim().toUpperCase();
+  if(UNLOCK_CODES.includes(v)){
+    localStorage.setItem('gh_unlocked','1');
+    document.getElementById('lockMsg').style.color = '#7be08a';
+    document.getElementById('lockMsg').textContent = '✅ Unlocked! Full reports are now open.';
+    setTimeout(refreshGate, 900);
+  } else {
+    document.getElementById('lockMsg').style.color = '#e07b7b';
+    document.getElementById('lockMsg').textContent = 'Invalid code. Pay via OPay above, then WhatsApp your screenshot.';
+  }
+}
+
+function copyAcct(){
+  navigator.clipboard.writeText('8140252151').then(()=>{
+    document.getElementById('acctNo').textContent = '✓ COPIED';
+    setTimeout(()=>document.getElementById('acctNo').textContent='8140252151', 1500);
+  });
+}
+
+/* ---------- ANALYZER ---------- */
+function analyze(){
+  const cvEl = document.getElementById('cv');
+  const cv = cvEl.value.toLowerCase();
+  if(cv.trim().length < 30){ alert("Upload your CV file or paste the text first."); return; }
+  if(!isUnlocked() && freeUsed()){
+    alert("Free scan used 🔒 Pay ₦500 via OPay, WhatsApp your screenshot, and unlock with your code.");
+    document.getElementById('paywall').scrollIntoView({behavior:'smooth'});
+    return;
+  }
+  const b = BANKS[document.getElementById('role').value];
+  const have = b.kw.filter(k => cv.includes(k));
+  const miss = b.kw.filter(k => !cv.includes(k));
+  const pct = Math.round(have.length / b.kw.length * 100);
+
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('scoreNum').textContent = pct + '%';
+  document.getElementById('scoreBar').style.width = pct + "%";
+  document.getElementById('verdict').textContent =
+    pct >= 70 ? "Strong CV — you're interview-ready. Apply now." :
+    pct >= 40 ? "Average — you'll beat most applicants after adding the missing keywords." :
+    "Weak for Gulf ATS — fix the gaps below before applying.";
+
+  document.getElementById('have').innerHTML = have.map(k=>`<span class="kw">${k}</span>`).join('') || '<span style="color:#777">None yet.</span>';
+  document.getElementById('miss').innerHTML = miss.map(k=>`<span class="kw miss">${k}</span>`).join('') || '<span style="color:#777">Nothing missing — perfect.</span>';
+
+  const lines = cvEl.value.split("\n").map(s=>s.trim()).filter(Boolean);
+  const name = (lines[0]||"Candidate").replace(/[^a-zA-Z .'-]/g,'').slice(0,40) || "Candidate";
+  const yrs = (cv.match(/(\d+)\s*\+?\s*(years?|yrs?)/)||[])[1];
+  const yearsTxt = yrs ? `${yrs}+ years of experience` : "proven hands-on experience";
+
+  document.getElementById('summary').textContent =
+`SUMMARY — ${name.toUpperCase()}
+${b.title} with ${yearsTxt}, targeting opportunities in Saudi Arabia & the Gulf. Core strengths: ${have.slice(0,5).join(", ") || "reliable, disciplined team player"}. Ready to relocate immediately, medically fit, and available for employer-sponsored visa processing. Seeking to deliver ${b.goal} for a leading Gulf employer.`;
+
+  document.getElementById('tips').innerHTML = b.tips.map(t=>`<div class="tip">→ ${t}</div>`).join('');
+  refreshGate();
+  if(!isUnlocked()) localStorage.setItem('gh_free','1');
+  document.getElementById('result').scrollIntoView({behavior:'smooth'});
+}
+
+function copyOut(){
+  navigator.clipboard.writeText(document.getElementById('summary').textContent)
+    .then(()=>alert("Summary copied — paste it at the top of your CV!"));
+}
+
+refreshGate();
+</script>
+</body>
+</html>
