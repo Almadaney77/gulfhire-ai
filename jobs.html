@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GulfHire AI — Live Verified Gulf Jobs</title>
+<script src="jobs.js"></script>
+<style>
+  :root{
+    --gold:#d4af37; --gold-light:#f0d98c; --gold-dark:#9a7b1f;
+    --black:#070707; --dark:#0e0e0e; --card:#141414; --line:rgba(212,175,55,.25);
+    --text:#e8e4d8; --muted:#a39f92; --green:#3ddc84; --red:#ff5c5c; --amber:#ffb347;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--black);color:var(--text);font-family:Georgia,'Times New Roman',serif;line-height:1.6}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 24px}
+  h1,h2,h3{font-weight:normal;letter-spacing:.5px}
+  a{color:var(--gold);text-decoration:none}
+  .btn{display:inline-block;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#0a0a0a;
+       padding:14px 34px;border-radius:3px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;
+       font-size:.85rem;border:none;cursor:pointer;transition:.25s}
+  .btn:hover{filter:brightness(1.15);transform:translateY(-2px)}
+  .btn.ghost{background:transparent;color:var(--gold);border:1px solid var(--gold)}
+  .tag{display:inline-block;border:1px solid var(--line);color:var(--gold);padding:5px 16px;border-radius:99px;
+       font-size:.72rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:22px}
+
+  /* NAV */
+  nav{position:sticky;top:0;background:rgba(7,7,7,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);z-index:50}
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:68px}
+  .logo{font-size:1.25rem;color:var(--gold);letter-spacing:2px}
+  .logo span{color:var(--text)}
+  nav .links a{color:var(--muted);margin-left:26px;font-size:.9rem;font-family:Arial,sans-serif}
+  nav .links a:hover{color:var(--gold)}
+
+  /* HERO */
+  .hero{text-align:center;padding:110px 24px 90px;
+        background:radial-gradient(ellipse at 50% -20%,rgba(212,175,55,.14),transparent 60%)}
+  .hero h1{font-size:clamp(2.2rem,5.5vw,4rem);line-height:1.15;margin-bottom:22px}
+  .hero h1 em{color:var(--gold);font-style:normal}
+  .hero p{color:var(--muted);max-width:620px;margin:0 auto 38px;font-size:1.1rem}
+  .hero .actions{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+
+  /* STATS */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:var(--line);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .stat{background:var(--dark);padding:34px 20px;text-align:center}
+  .stat b{display:block;color:var(--gold);font-size:2rem}
+  .stat span{color:var(--muted);font-size:.85rem;font-family:Arial,sans-serif}
+
+  section{padding:90px 0}
+  .sec-head{text-align:center;margin-bottom:56px}
+  .sec-head h2{font-size:2.2rem;color:var(--gold)}
+  .sec-head p{color:var(--muted);max-width:560px;margin:12px auto 0}
+
+  /* STEPS */
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:26px}
+  .step{background:var(--card);border:1px solid var(--line);padding:38px 30px;border-radius:6px;transition:.3s}
+  .step:hover{transform:translateY(-6px);border-color:var(--gold)}
+  .step .num{font-size:2.4rem;color:var(--gold);opacity:.5}
+  .step h3{margin:14px 0 10px;color:var(--gold-light);font-size:1.2rem}
+  .step p{color:var(--muted);font-size:.95rem;font-family:Arial,sans-serif}
+
+  /* DEMO */
+  .demo-tabs{display:flex;justify-content:center;gap:10px;margin-bottom:34px;flex-wrap:wrap}
+  .demo-tabs button{background:transparent;border:1px solid var(--line);color:var(--muted);padding:10px 26px;
+                    border-radius:99px;cursor:pointer;font-family:Arial,sans-serif;font-size:.85rem;letter-spacing:1px}
+  .demo-tabs button.active{background:var(--gold);color:#0a0a0a;border-color:var(--gold);font-weight:bold}
+  .demo-panel{max-width:760px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:36px}
+  .demo-panel.hidden{display:none}
+  label{display:block;color:var(--gold);font-size:.8rem;letter-spacing:2px;text-transform:uppercase;margin:18px 0 8px;font-family:Arial,sans-serif}
+  textarea,select{width:100%;background:#0a0a0a;border:1px solid var(--line);color:var(--text);padding:14px;
+                  border-radius:4px;font-family:Arial,sans-serif;font-size:.95rem;resize:vertical}
+  textarea:focus,select:focus{outline:none;border-color:var(--gold)}
+  .result{margin-top:26px;border-radius:6px;padding:22px;display:none;font-family:Arial,sans-serif;font-size:.93rem}
+  .result.show{display:block}
+  .result.safe{background:rgba(61,220,132,.08);border:1px solid rgba(61,220,132,.4)}
+  .result.caution{background:rgba(255,179,71,.08);border:1px solid rgba(255,179,71,.45)}
+  .result.scam{background:rgba(255,92,92,.08);border:1px solid rgba(255,92,92,.45)}
+  .result h4{margin-bottom:10px;font-size:1.05rem}
+  .result.safe h4{color:var(--green)} .result.caution h4{color:var(--amber)} .result.scam h4{color:var(--red)}
+  .result ul{margin:10px 0 0 20px;color:var(--text)}
+  .result .score{float:right;font-size:.8rem;color:var(--muted)}
+  .job-card{background:#0a0a0a;border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:4px;
+            padding:18px 20px;margin-top:14px}
+  .job-card b{color:var(--gold-light)}
+  .job-card small{color:var(--muted);display:block;margin-top:4px;font-family:Arial,sans-serif}
+  .badge{display:inline-block;font-size:.68rem;padding:3px 10px;border-radius:99px;letter-spacing:1px;
+         font-family:Arial,sans-serif;margin-top:8px}
+  .badge.verified{background:rgba(61,220,132,.12);color:var(--green);border:1px solid rgba(61,220,132,.4)}
+
+  /* PRICING */
+  .pricing{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:26px}
+  .plan{background:var(--card);border:1px solid var(--line);padding:42px 32px;border-radius:6px;text-align:center;position:relative}
+  .plan.featured{border-color:var(--gold);background:linear-gradient(180deg,rgba(212,175,55,.08),var(--card))}
+  .plan .pop{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--gold);color:#0a0a0a;
+             font-size:.68rem;font-weight:bold;letter-spacing:2px;padding:5px 16px;border-radius:99px;font-family:Arial,sans-serif}
+  .plan h3{color:var(--gold);letter-spacing:2px;text-transform:uppercase;font-size:.95rem}
+  .plan .price{font-size:2.6rem;color:var(--text);margin:16px 0 4px}
+  .plan .price small{font-size:.9rem;color:var(--muted)}
+  .plan ul{list-style:none;margin:24px 0 30px;font-family:Arial,sans-serif;font-size:.9rem;color:var(--muted)}
+  .plan ul li{padding:8px 0;border-bottom:1px solid rgba(212,175,55,.1)}
+  .plan ul li::before{content:"◆ ";color:var(--gold);font-size:.7rem}
+
+  /* CTA / FOOTER */
+  .cta{text-align:center;background:radial-gradient(ellipse at 50% 120%,rgba(212,175,55,.15),transparent 60%);
+       border-top:1px solid var(--line)}
+  footer{border-top:1px solid var(--line);padding:34px 0;text-align:center;color:var(--muted);
+         font-size:.85rem;font-family:Arial,sans-serif}
+  footer .gold{color:var(--gold)}
+  @media(max-width:640px){.hero{padding:70px 20px 60px}section{padding:64px 0}.demo-panel{padding:24px}}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <div class="logo">GULFHIRE <span>AI</span></div>
+  <div class="links">
+    <a href="index.html">📝 CV Scanner</a><a href="#how">How It Works</a><a href="#demo">Live Tools</a><a href="#pricing">Pricing</a>
+    <a href="https://wa.me/2349060531277" target="_blank">WhatsApp</a>
+  </div>
+</div></nav>
+
+<div style="background:linear-gradient(135deg,#191507,#0f0d06);border-bottom:1px solid rgba(212,175,55,.3);text-align:center;padding:10px 16px;font-family:Arial,sans-serif;font-size:.82rem;color:#a39f92">📝 New here? Scan your CV against Gulf ATS first — <a href="index.html" style="color:#d4af37;font-weight:bold">try the free CV Optimizer →</a></div>
+<header class="hero">
+  <div class="tag">Built for Nigerians · Gulf Careers</div>
+  <h1>Verified Gulf Jobs.<br><em>Zero Scams.</em></h1>
+  <p>GulfHire AI scans 20+ Gulf job portals, verifies every employer on Qiwa, matches you to real hospitality roles — and tailors your CV to Gulf standards. Never pay a fake agent again.</p>
+  <div class="actions">
+    <a class="btn" href="#demo">Try the Scam Checker</a>
+    <a class="btn ghost" href="https://wa.me/2349060531277" target="_blank">Chat on WhatsApp</a>
+  </div>
+</header>
+
+<div class="stats"><div class="wrap" style="display:contents">
+  <div class="stat"><b>LIVE</b><span>Listings from official portals</span></div>
+  <div class="stat"><b>100%</b><span>Employers Qiwa-verified</span></div>
+  <div class="stat"><b>₦0</b><span>Ever paid to fake agents</span></div>
+  <div class="stat"><b>24/7</b><span>AI matching engine</span></div>
+</div></div>
+
+<section id="how"><div class="wrap">
+  <div class="sec-head"><h2>How It Works</h2><p>Three steps between you and a verified Gulf offer letter.</p></div>
+  <div class="steps">
+    <div class="step"><div class="num">01</div><h3>We Scan & Verify</h3>
+      <p>Our engine aggregates hospitality roles from Hilton, Marriott, Accor, GulfTalent, Naukrigulf and more — then verifies every employer's Commercial Registration on Qiwa.sa.</p></div>
+    <div class="step"><div class="num">02</div><h3>You're Matched</h3>
+      <p>Tell us your role, experience and preferred city (Madinah, Riyadh, Jeddah, Dubai...). Get matched to real openings with visa-sponsored, employer-pays-everything roles first.</p></div>
+    <div class="step"><div class="num">03</div><h3>CV Tailored & Applied</h3>
+      <p>Your CV is rewritten to Gulf employer standards and ATS-optimized for each application — in English and Arabic where required. You apply with confidence.</p></div>
+  </div>
+</div></section>
+
+<section id="demo" style="background:var(--dark);border-top:1px solid var(--line);border-bottom:1px solid var(--line)"><div class="wrap">
+  <div class="sec-head"><h2>Live Demo</h2><p>Two tools working right now. No sign-up needed.</p></div>
+  <div class="demo-tabs">
+    <button class="active" onclick="switchTab('scam',this)">🛡️ Scam Checker</button>
+    <button onclick="switchTab('match',this)">🎯 Live Job Board</button>
+  </div>
+
+  <!-- SCAM CHECKER -->
+  <div class="demo-panel" id="panel-scam">
+    <p style="color:var(--muted);font-family:Arial,sans-serif;font-size:.9rem">
+      Received a "job offer" on WhatsApp? Paste it below. Our AI hunts for the classic scam signatures used by fake Gulf recruiters.</p>
+    <label>Paste the job offer / recruiter message</label>
+    <textarea id="offerText" rows="7" placeholder="Example: Congratulations! You have been selected for Hotel Job in Saudi Arabia Salary $4000 weekly. Pay visa processing fee of ₦85,000 to secure slot. Contact agent on WhatsApp +91..."></textarea>
+    <div style="margin-top:22px;text-align:center">
+      <button class="btn" onclick="checkScam()">Analyze Offer</button>
+    </div>
+    <div class="result" id="scamResult"></div>
+  </div>
+
+  <!-- JOB MATCHER -->
+  <div class="demo-panel hidden" id="panel-match">
+    <p style="color:var(--muted);font-family:Arial,sans-serif;font-size:.9rem">
+      Live listings pulled from official career portals & job boards (updated daily by our scraper). Choose your profile:</p>
+    <label>Preferred Role</label>
+    <select id="roleSel">
+      <option value="any">Any entry-level role</option>
+      <option value="housekeeping">Housekeeping</option>
+      <option value="waiter">Waiter / Restaurant</option>
+      <option value="frontdesk">Front Desk / Reception</option>
+      <option value="security">Security / Safety</option>
+      <option value="chef">Kitchen / Chef</option>
+    </select>
+    <label>Preferred City</label>
+    <select id="citySel">
+      <option value="any">Any city</option>
+      <option value="madinah">Madinah</option>
+      <option value="riyadh">Riyadh</option>
+      <option value="jeddah">Jeddah</option>
+      <option value="dubai">Dubai (UAE)</option>
+    </select>
+    <div style="margin-top:22px;text-align:center">
+      <button class="btn" onclick="matchJobs()">Find My Matches</button>
+    </div>
+    <div id="matchResults" style="margin-top:10px"></div>
+  </div>
+</div></section>
+
+<section id="pricing"><div class="wrap">
+  <div class="sec-head"><h2>Pricing</h2><p>Start free. Upgrade when you're serious about moving.</p></div>
+  <div class="pricing">
+    <div class="plan">
+      <h3>Explorer</h3><div class="price">Free</div>
+      <ul><li>Weekly verified-job digest</li><li>Scam Checker (unlimited)</li><li>Qiwa verification guides</li></ul>
+      <a class="btn ghost" href="https://wa.me/2349060531277" target="_blank">Start Free</a>
+    </div>
+    <div class="plan featured">
+      <div class="pop">MOST POPULAR</div>
+      <h3>Go-Getter</h3><div class="price">₦3,500<small>/month</small></div>
+      <ul><li>Instant job alerts (WhatsApp)</li><li>Gulf-standard CV tailoring</li><li>ATS-optimized applications</li><li>Priority matching (visa-sponsored first)</li></ul>
+      <a class="btn" href="https://wa.me/2349060531277" target="_blank">Get Access</a>
+    </div>
+    <div class="plan">
+      <h3>Fast-Track</h3><div class="price">₦15,000<small>/one-time</small></div>
+      <ul><li>Everything in Go-Getter</li><li>1-on-1 application strategy call</li><li>Arabic CV version included</li><li>Interview prep kit</li></ul>
+      <a class="btn ghost" href="https://wa.me/2349060531277" target="_blank">Apply Now</a>
+    </div>
+  </div>
+</div></section>
+
+<section class="cta"><div class="wrap">
+  <h2 style="color:var(--gold);font-size:2.2rem;margin-bottom:16px">Your Gulf career starts with one message.</h2>
+  <p style="color:var(--muted);max-width:520px;margin:0 auto 34px">Chat with GulfHire AI on WhatsApp — get your first verified matches in under 2 minutes.</p>
+  <a class="btn" href="https://wa.me/2349060531277" target="_blank">💬 Message on WhatsApp</a>
+</div></section>
+
+<footer>
+  <div class="wrap">© 2026 GulfHire AI · A product by <span class="gold">Almadaney</span> · Verify every employer on <a href="https://qiwa.sa" target="_blank">Qiwa.sa</a> · Never pay for a job.</div>
+</footer>
+
+<script>
+function switchTab(name,btn){
+  document.querySelectorAll('.demo-panel').forEach(p=>p.classList.add('hidden'));
+  document.getElementById('panel-'+name).classList.remove('hidden');
+  document.querySelectorAll('.demo-tabs button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+const FLAGS=[
+ {re:/(processing fee|visa fee|pay\s*(for)?\s*(the)?\s*(visa|job|registration|medical|slot)|payment of|send money|₦|naira|\$\s?\d+\s*fee)/i,
+  msg:"💸 Asks for money — legitimate Gulf employers never charge recruitment/visa fees."},
+ {re:/(\+91|india agent|from india)/i,
+  msg:"🇮🇳 +91 / Indian-agent contact — a known red flag for Nigeria-targeting scams."},
+ {re:/(guaranteed|100%\s*(visa|job)|assured visa|no interview needed|no experience needed.*high salary)/i,
+  msg:"🎭 'Guaranteed visa/job' — real employers always interview. Nothing is guaranteed."},
+ {re:/(urgent|only \d+ slots|limited slot|apply now or|today only|expires?)/i,
+  msg:"⏰ Manufactured urgency — a classic pressure tactic to stop you thinking."},
+ {re:/(whatsapp only|contact (the )?agent|chat me on|dm me)/i,
+  msg:"📱 WhatsApp-only 'agent' contact — real hotels use official career portals & corporate emails."},
+ {re:/\b(gmail|yahoo|hotmail|outlook)\.com/i,
+  msg:"📧 Free email domain posing as an 'official' offer — corporate recruiters use company domains."},
+ {re:/(send (us )?(your )?(passport|international passport|id card|bvn)|scan of your passport)/i,
+  msg:"🪪 Requests passport/ID before any interview — identity-theft risk. Never send documents upfront."},
+ {re:/(\$\s?[3-9],\d{3}\s*(per|\/)?\s*week|₦\s?[2-9]\d{2},?\d{3}\s*(per|\/)?\s*month)/i,
+  msg:"💰 Unrealistic salary for entry-level hospitality — bait to hook desperate seekers."},
+ {re:/(hotel (job|worker) wanted|workers needed urgently|cleaners? wanted abroad)/i,
+  msg:"🏨 Vague job title with no hotel name, brand, or job reference — real listings are specific."}
+];
+
+function checkScam(){
+  const t=document.getElementById('offerText').value.trim();
+  const box=document.getElementById('scamResult');
+  if(!t){box.className='result caution show';box.innerHTML='<h4>⚠️ Paste a message first</h4><p>Copy any job offer you received and paste it above.</p>';return;}
+  const hits=FLAGS.filter(f=>f.re.test(t));
+  const n=hits.length;
+  let cls,title,summary;
+  if(n===0){cls='safe';title='✅ No scam signatures detected';
+    summary='This message passed our red-flag scan. Still verify: search the company name on <b>Qiwa.sa</b>, confirm the role exists on the hotel\u2019s official careers page, and never pay anyone.';}
+  else if(n<=2){cls='caution';title='⚠️ Proceed with caution — '+n+' red flag'+(n>1?'s':'')+' found';
+    summary='Some warning signs are present. Verify the employer\u2019s Commercial Registration on <b>Qiwa.sa</b> and cross-check the job on the official hotel careers portal before sharing any documents.';}
+  else{cls='scam';title='🚨 Likely SCAM — '+n+' red flags found';
+    summary='This has the signature pattern of a fake Gulf recruiter. <b>Do not pay, do not send documents, do not continue the chat.</b> Report & block.';}
+  box.className='result '+cls+' show';
+  box.innerHTML='<h4>'+title+'<span class="score">Risk score: '+Math.min(n,9)+'/9</span></h4><p>'+summary+'</p>'+
+    (n?'<ul>'+hits.map(h=>'<li>'+h.msg+'</li>').join('')+'</ul>':'');
+}
+
+// Fallback data (used if jobs.js is missing) — generated 2026-09-11
+var FALLBACK_JOBS = [
+  {title:"Receptionist (Chinese Speaker) — Crowne Plaza Madinah", hotel:"IHG / Crowne Plaza", city:"madinah", role:"frontdesk",
+   pay:"See official listing", visa:"Apply on official portal — never via WhatsApp agents", source:"IHG Careers", url:"https://careers.ihg.com/en/search-and-apply/?q=madinah", date:"2026-09"},
+  {title:"Front Office Agent — Medina Hotels", hotel:"Multiple Medina properties", city:"madinah", role:"frontdesk",
+   pay:"See listing", visa:"Verify employer on Qiwa.sa", source:"Glassdoor (59 open hospitality roles in Medina)", url:"https://www.glassdoor.com/Job/medina-hospitality-jobs-SRCH_IL.0,6_IM1650_KO7,18.htm", date:"2026-09"},
+  {title:"Waiter / Waitress — Medina", hotel:"Multiple Medina properties", city:"madinah", role:"waiter",
+   pay:"See listing", visa:"Verify employer on Qiwa.sa", source:"Glassdoor Medina hospitality board", url:"https://www.glassdoor.com/Job/medina-hospitality-jobs-SRCH_IL.0,6_IM1650_KO7,18.htm", date:"2026-09"},
+  {title:"Madinah Hotel Roles — 39 current vacancies", hotel:"Various (Naukrigulf board)", city:"madinah", role:"any",
+   pay:"Varies", visa:"Apply via portal only", source:"Naukrigulf — Hotel Jobs in Al Madina Al Munawarah", url:"https://www.naukrigulf.com/hotel-jobs-in-al-madina-al-munawarah", date:"2026-09"},
+  {title:"Sofitel Shahd Al Madinah — multiple roles", hotel:"Accor / Sofitel", city:"madinah", role:"any",
+   pay:"See listing", visa:"Official Accor portal", source:"Accor Careers", url:"https://careers.accor.com/global/en/jobs?ln=Madinah", date:"2026-09"},
+  {title:"Team opportunities — Elaf Taiba Hotel, Madinah", hotel:"Elaf Group", city:"madinah", role:"any",
+   pay:"See listing", visa:"Direct hotel email/application", source:"Elaf Taiba careers page", url:"https://www.elafhotels.com/elaf-taiba/careers", date:"2026-09"},
+  {title:"Turndown Attendant — Four Seasons Resort, The Red Sea", hotel:"Four Seasons", city:"any", role:"housekeeping",
+   pay:"See listing", visa:"Official portal only — Four Seasons warns of fake offers", source:"Four Seasons Careers", url:"https://careers.fourseasons.com/us/en/search-results?keywords=saudi%20arabia", date:"2026-09"},
+  {title:"Housekeeper — 60 live roles across KSA", hotel:"Marriott, Accor, Four Seasons + more", city:"any", role:"housekeeping",
+   pay:"See listings", visa:"Employer-sponsored (verify per listing)", source:"GulfTalent Saudi housekeeper board", url:"https://www.gulftalent.com/saudi-arabia/jobs/title/housekeeper", date:"2026-09"},
+  {title:"Housekeeping Attendant — top chains hiring", hotel:"Marriott Int'l, Accor, Four Seasons, Al Futtaim", city:"any", role:"housekeeping",
+   pay:"See listings", visa:"Verify on Qiwa.sa", source:"GulfTalent housekeeping board", url:"https://www.gulftalent.com/saudi-arabia/jobs/title/housekeeping-attendant", date:"2026-09"},
+  {title:"Housekeeping — 573 Saudi vacancies", hotel:"Top Gulf companies", city:"any", role:"housekeeping",
+   pay:"Varies", visa:"Filter 'visa provided' in search", source:"Naukrigulf Saudi housekeeping board", url:"https://www.naukrigulf.com/housekeeping-jobs-in-saudi-arabia", date:"2026-09"},
+  {title:"Room Attendant — InterContinental Durrat Al Riyadh Resort & Spa", hotel:"IHG / InterContinental", city:"riyadh", role:"housekeeping",
+   pay:"See listing", visa:"Official IHG portal", source:"IHG Careers", url:"https://careers.ihg.com/en/search-and-apply/?q=riyadh", date:"2026-09"},
+  {title:"Receptionist — InterContinental Durrat Al Riyadh Resort & Spa", hotel:"IHG / InterContinental", city:"riyadh", role:"frontdesk",
+   pay:"See listing", visa:"Official IHG portal", source:"IHG Careers", url:"https://careers.ihg.com/en/search-and-apply/?q=riyadh", date:"2026-09"},
+  {title:"Chef De Partie (Pastry) — InterContinental Al Jubail", hotel:"IHG / InterContinental", city:"any", role:"chef",
+   pay:"See listing", visa:"Official IHG portal", source:"IHG Careers", url:"https://careers.ihg.com/en/search-and-apply/?area=saudiarabia", date:"2026-09"},
+  {title:"Room Service Attendant — Saudi Arabia", hotel:"Marriott Int'l, Accor, Four Seasons", city:"any", role:"waiter",
+   pay:"See listings", visa:"Verify on Qiwa.sa", source:"GulfTalent room service board", url:"https://www.gulftalent.com/saudi-arabia/jobs/title/room-service-attendant", date:"2026-09"},
+  {title:"1,862 live hospitality jobs — Saudi Arabia", hotel:"All categories: catering, customer service...", city:"any", role:"any",
+   pay:"Varies", visa:"Filter per listing", source:"GulfTalent Saudi hospitality hub", url:"https://www.gulftalent.com/Saudi-Arabia/jobs/industry/hospitality", date:"2026-09"}
+];
+var JOBS = (typeof GULFHIRE_JOBS !== "undefined") ? GULFHIRE_JOBS : FALLBACK_JOBS;
+
+function matchJobs(){
+  const r=document.getElementById('roleSel').value,c=document.getElementById('citySel').value;
+  let m=JOBS.filter(j=>(r==='any'||j.role===r||j.role==='any')&&(c==='any'||j.city===c));
+  if(r==='any'&&c!=='any')m=JOBS.filter(j=>j.city===c);
+  if(r!=='any'&&c==='any')m=JOBS.filter(j=>j.role===r||j.role==='any');
+  const out=document.getElementById('matchResults');
+  const live=(typeof GULFHIRE_JOBS!=="undefined");
+  const stamp='<p style="color:var(--gold);font-size:.78rem;letter-spacing:1px;font-family:Arial,sans-serif;margin-top:20px">'
+    +(live?'● LIVE FEED ACTIVE':'○ FALLBACK DATA — run gulfhire_scraper.py to go live')+'</p>';
+  if(!m.length){out.innerHTML=stamp+'<div class="job-card"><b>No matches for that filter yet</b><small>Try "Any" — or message us on WhatsApp and we\u2019ll hunt for you personally.</small></div>';return;}
+  out.innerHTML=stamp+'<p style="color:var(--muted);font-size:.85rem;font-family:Arial,sans-serif">'+m.length+' live listing(s) — always apply on the official portal:</p>'+
+   m.map(j=>'<div class="job-card"><b>'+j.title+'</b>'+
+   '<small>\ud83d\udccd '+(j.city==='any'?'Saudi Arabia — multiple cities':j.city.charAt(0).toUpperCase()+j.city.slice(1))+
+   ' &nbsp;·&nbsp; \ud83c\udfe8 '+j.hotel+
+   (j.date?' &nbsp;·&nbsp; \ud83d\udcc5 '+j.date:'')+'</small>'+
+   '<small style="color:#7d7a6f">'+j.visa+'</small>'+
+   '<div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">'+
+   '<a class="btn" style="padding:8px 20px;font-size:.72rem" href="'+j.url+'" target="_blank" rel="noopener">Apply on '+j.source+' \u2197</a>'+
+   '<span class="badge verified" style="margin-top:0">\u2714 OFFICIAL SOURCE</span></div></div>').join('');
+}
+</script>
+</body>
+</html>
