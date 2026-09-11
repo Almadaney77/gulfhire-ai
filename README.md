@@ -1,1 +1,0 @@
-# gulfhire-ai
